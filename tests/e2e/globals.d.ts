@@ -8,7 +8,7 @@ declare global {
 
     // lifecycle.html
     __ns?: string;
-    __seed?: (initial: unknown) => Promise<{
+    __seed?: () => Promise<{
       value?: unknown;
       revision?: number;
       error?: string;
