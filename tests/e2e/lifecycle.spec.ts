@@ -29,9 +29,7 @@ test.describe("slot lifecycle", () => {
       timeout: 10_000,
     });
 
-    const reopened = await page.evaluate(() =>
-      window.__seed!({ title: "IGNORED", blocks: [] }),
-    );
+    const reopened = await page.evaluate(() => window.__seed!());
     expect(reopened.revision).toBe(2);
     expect((reopened.value as { title: string }).title).toBe(
       "Persistent title",
@@ -73,7 +71,9 @@ test.describe("slot lifecycle", () => {
     expect(after.revision).toBeGreaterThan(1);
   });
 
-  test("destroy() clears the slot; next open sees initial", async ({ page }) => {
+  test("destroy() clears the slot; next open sees the fixture's initial", async ({
+    page,
+  }) => {
     const ns = `destroy-${Math.random().toString(36).slice(2)}`;
     await page.goto(`/lifecycle.html?ns=${ns}`);
     await page.waitForFunction(() => window.__done === true, undefined, {
@@ -83,14 +83,14 @@ test.describe("slot lifecycle", () => {
     await page.evaluate(() => window.__setTitle!("About to go"));
     await page.evaluate(() => window.__destroy!());
 
+    // Reload — the same slot in a fresh registry should behave like a
+    // first open and get the fixture's INITIAL back.
     await page.goto(`/lifecycle.html?ns=${ns}`);
     await page.waitForFunction(() => window.__done === true, undefined, {
       timeout: 10_000,
     });
-    const seeded = await page.evaluate(() =>
-      window.__seed!({ title: "Fresh", blocks: [] }),
-    );
-    expect((seeded.value as { title: string }).title).toBe("Fresh");
+    const seeded = await page.evaluate(() => window.__seed!());
+    expect((seeded.value as { title: string }).title).toBe("Untitled");
     expect(seeded.revision).toBe(1);
   });
 });

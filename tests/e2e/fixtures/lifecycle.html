@@ -16,11 +16,18 @@
       const ns = params.get("ns") ?? `t-${Math.random().toString(36).slice(2)}`;
       const durable = createDurable({ namespace: ns });
 
+      const INITIAL = { title: "Untitled", blocks: [] };
+
+      // Every fixture function that calls open() uses the same INITIAL —
+      // the first open() wins per PRD semantics; later `initial` values
+      // are ignored.
+      const openSlot = () => durable.open("workspace", { initial: INITIAL });
+
       window.__ns = ns;
 
-      window.__seed = async (initial) => {
+      window.__seed = async () => {
         try {
-          const slot = await durable.open("workspace", { initial });
+          const slot = await openSlot();
           return { value: slot.value, revision: slot.revision };
         } catch (err) {
           return { error: isDurableError(err) ? err.code : String(err) };
@@ -28,17 +35,13 @@
       };
 
       window.__setTitle = async (title) => {
-        const slot = await durable.open("workspace", {
-          initial: { title: "", blocks: [] },
-        });
+        const slot = await openSlot();
         await slot.set({ ...slot.value, title });
         return { value: slot.value, revision: slot.revision };
       };
 
       window.__updateAppend = async (block) => {
-        const slot = await durable.open("workspace", {
-          initial: { title: "", blocks: [] },
-        });
+        const slot = await openSlot();
         await slot.update((current) => ({
           ...current,
           blocks: [...current.blocks, block],
@@ -47,17 +50,13 @@
       };
 
       window.__reset = async () => {
-        const slot = await durable.open("workspace", {
-          initial: { title: "Untitled", blocks: [] },
-        });
+        const slot = await openSlot();
         await slot.reset();
         return { value: slot.value, revision: slot.revision };
       };
 
       window.__destroy = async () => {
-        const slot = await durable.open("workspace", {
-          initial: { title: "Untitled", blocks: [] },
-        });
+        const slot = await openSlot();
         await slot.destroy();
         return true;
       };
