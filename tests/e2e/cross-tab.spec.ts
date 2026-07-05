@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import "./globals";
+/// <reference path="./globals.d.ts" />
 
 /**
  * The cross-tab gate.

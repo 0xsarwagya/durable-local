@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import "./globals";
+/// <reference path="./globals.d.ts" />
 
 /**
  * A runtime without IndexedDB must surface a typed UNSUPPORTED error —
