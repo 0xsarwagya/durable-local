@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>durable-local cross-tab fixture</title>
+  </head>
+  <body>
+    <pre id="log"></pre>
+    <script type="module">
+      import { createDurable, isDurableError } from "@0xsarwagya/durable-local";
+
+      const params = new URLSearchParams(location.search);
+      const ns = params.get("ns");
+      if (!ns) throw new Error("cross-tab fixture requires ?ns=<namespace>");
+
+      const durable = createDurable({ namespace: ns });
+      const events = [];
+      window.__events = events;
+
+      const slot = await durable.open("counter", {
+        initial: { n: 0 },
+      });
+
+      slot.subscribe((value, event) => {
+        events.push({
+          n: value.n,
+          revision: event.revision,
+          source: event.source,
+        });
+      });
+
+      window.__ns = ns;
+      window.__value = () => slot.value;
+      window.__revision = () => slot.revision;
+
+      window.__increment = async () => {
+        try {
+          await slot.update((c) => ({ n: c.n + 1 }));
+          return { value: slot.value, revision: slot.revision };
+        } catch (err) {
+          return { error: isDurableError(err) ? err.code : String(err) };
+        }
+      };
+
+      window.__ready = true;
+    </script>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>durable-local unsupported fixture</title>
+    <script>
+      // Break IndexedDB BEFORE the library loads.
+      Object.defineProperty(window, "indexedDB", {
+        configurable: true,
+        value: undefined,
+      });
+    </script>
+  </head>
+  <body>
+    <pre id="log"></pre>
+    <script type="module">
+      import { createDurable, isDurableError } from "@0xsarwagya/durable-local";
+
+      const durable = createDurable();
+      const result = {
+        threw: false,
+      };
+
+      try {
+        result.storage = await durable.storage();
+      } catch (err) {
+        result.storageError = isDurableError(err) ? err.code : String(err);
+      }
+
+      try {
+        await durable.open("workspace", { initial: { n: 0 } });
+      } catch (err) {
+        result.threw = true;
+        result.code = isDurableError(err) ? err.code : undefined;
+        result.operation = isDurableError(err) ? err.operation : undefined;
+        result.message = err?.message ?? String(err);
+      }
+
+      window.__result = result;
+      window.__done = true;
+    </script>
+  </body>
+</html>

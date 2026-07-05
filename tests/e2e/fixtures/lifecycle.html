@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>durable-local lifecycle fixture</title>
+  </head>
+  <body>
+    <pre id="log"></pre>
+    <script type="module">
+      import {
+        createDurable,
+        isDurableError,
+      } from "@0xsarwagya/durable-local";
+
+      const params = new URLSearchParams(location.search);
+      const ns = params.get("ns") ?? `t-${Math.random().toString(36).slice(2)}`;
+      const durable = createDurable({ namespace: ns });
+
+      window.__ns = ns;
+
+      window.__seed = async (initial) => {
+        try {
+          const slot = await durable.open("workspace", { initial });
+          return { value: slot.value, revision: slot.revision };
+        } catch (err) {
+          return { error: isDurableError(err) ? err.code : String(err) };
+        }
+      };
+
+      window.__setTitle = async (title) => {
+        const slot = await durable.open("workspace", {
+          initial: { title: "", blocks: [] },
+        });
+        await slot.set({ ...slot.value, title });
+        return { value: slot.value, revision: slot.revision };
+      };
+
+      window.__updateAppend = async (block) => {
+        const slot = await durable.open("workspace", {
+          initial: { title: "", blocks: [] },
+        });
+        await slot.update((current) => ({
+          ...current,
+          blocks: [...current.blocks, block],
+        }));
+        return { value: slot.value, revision: slot.revision };
+      };
+
+      window.__reset = async () => {
+        const slot = await durable.open("workspace", {
+          initial: { title: "Untitled", blocks: [] },
+        });
+        await slot.reset();
+        return { value: slot.value, revision: slot.revision };
+      };
+
+      window.__destroy = async () => {
+        const slot = await durable.open("workspace", {
+          initial: { title: "Untitled", blocks: [] },
+        });
+        await slot.destroy();
+        return true;
+      };
+
+      window.__done = true;
+    </script>
+  </body>
+</html>

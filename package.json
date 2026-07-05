@@ -1,0 +1,57 @@
+{
+  "name": "@0xsarwagya/durable-local",
+  "version": "0.1.0",
+  "description": "Named durable values for the browser. No database, no state manager, no sync engine.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0xsarwagya/durable-local.git"
+  },
+  "homepage": "https://oss.sarwagya.wtf/durable-local",
+  "keywords": [
+    "persistence",
+    "indexeddb",
+    "browser",
+    "storage",
+    "state",
+    "durable",
+    "typescript"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup && tsc -p tsconfig.build.json",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:lifecycle": "playwright test --project=chromium-lifecycle --project=firefox-lifecycle --project=webkit-lifecycle",
+    "test:e2e:cross-tab": "playwright test --project=chromium-cross-tab --project=firefox-cross-tab --project=webkit-cross-tab",
+    "test:e2e:install": "playwright install --with-deps",
+    "prepare": "tsup && tsc -p tsconfig.build.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@types/node": "^22.15.3",
+    "fake-indexeddb": "^6.0.0",
+    "tsup": "^8.3.5",
+    "typescript": "5.9.2",
+    "vite": "^5.4.11",
+    "vitest": "^3.0.0"
+  },
+  "packageManager": "pnpm@9.0.0"
+}
