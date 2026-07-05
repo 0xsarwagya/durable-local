@@ -61,6 +61,17 @@ If you need any of those, this package is not what you want.
 Runs on IndexedDB. Tested on every commit in Chromium, Firefox, and
 WebKit via Playwright.
 
+## Used in Local
+
+[Local](https://local.sarwagya.wtf) uses `durable-local` to keep each
+peer's chat history alive across reloads. One slot per peer, one
+`update()` per received message, atomic commits, no database. If the
+peer's public key changes on reconnect, the slot refuses to attach —
+that pinning is the only thing between recovered identity and silent
+peer substitution.
+
+Source: [github.com/0xsarwagya/local](https://github.com/0xsarwagya/local)
+
 ## Docs and demo
 
 - Docs: https://oss.sarwagya.wtf/durable-local/docs
